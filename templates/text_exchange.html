@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Text Exchange{% endblock %}
+
+{% block content %}
+<h2>Text Exchange</h2>
+<div id="text-exchange">
+    <h3>Empathetic Text Generation</h3>
+    <div id="empathetic-conversation" class="conversation"></div>
+    <textarea id="context" placeholder="Enter context here..."></textarea>
+    <textarea id="message" placeholder="Enter your message here..."></textarea>
+    <div class="tone">
+        <button onclick="setTone('Formal')">Formal</button>
+        <button onclick="setTone('Casual')">Casual</button>
+        <button onclick="setTone('Super Casual')">Super Casual</button>
+    </div>
+    <button onclick="generateEmpatheticText()">Generate Response</button>
+    <button onclick="copyToClipboard('empathetic-conversation')">Copy to Clipboard</button>
+
+    <h3>Flirty Text Generation</h3>
+    <div id="flirty-conversation" class="conversation"></div>
+    <div class="persona">
+        <button onclick="setPersona('Serious')">Serious</button>
+        <button onclick="setPersona('Nerd')">Nerd</button>
+        <button onclick="setPersona('Player')">Player</button>
+    </div>
+    <textarea id="flirty_message" placeholder="Enter your message here..."></textarea>
+    <button onclick="generateFlirtyText()">Generate Response</button>
+    <button onclick="copyToClipboard('flirty-conversation')">Copy to Clipboard</button>
+</div>
+
+<script>
+    let tone = 'Casual';
+    let persona = 'Serious';
+
+    function setTone(selectedTone) {
+        tone = selectedTone;
+    }
+
+    function setPersona(selectedPersona) {
+        persona = selectedPersona;
+    }
+
+    function generateEmpatheticText() {
+        const context = document.getElementById('context').value;
+        const message = document.getElementById('message').value;
+        
+        const userMessage = document.createElement('div');
+        userMessage.classList.add('user-message');
+        userMessage.innerText = `You: ${message}`;
+        document.getElementById('empathetic-conversation').appendChild(userMessage);
+
+        fetch('/generate_empathetic_text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ context, message, tone }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('bot-message');
+            botMessage.innerText = `EQ.ai: ${data}`;
+            document.getElementById('empathetic-conversation').appendChild(botMessage);
+            if (data.error) {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    function generateFlirtyText() {
+        const message = document.getElementById('flirty_message').value;
+        
+        const userMessage = document.createElement('div');
+        userMessage.classList.add('user-message');
+        userMessage.innerText = `You: ${message}`;
+        document.getElementById('flirty-conversation').appendChild(userMessage);
+
+        fetch('/generate_flirty_text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ persona, message }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('bot-message');
+            botMessage.innerText = `EQ.ai: ${data}`;
+            document.getElementById('flirty-conversation').appendChild(botMessage);
+            if (data.error) {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(text);
+    }
+</script>
+
+<style>
+    .conversation {
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 300px;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+    }
+
+    .user-message, .bot-message {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 5px 0;
+        width: 40%;
+        border-radius: 10px;
+    }
+
+    .user-message {
+        text-align: left;
+        margin-left: auto;
+        color: blue;
+        background-color: #f0f8ff;
+    }
+
+    .bot-message {
+        text-align: left;
+        margin-right: auto;
+        color: green;
+        background-color: #e6ffe6;
+    }
+</style>
+{% endblock %}

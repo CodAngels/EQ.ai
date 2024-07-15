@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.username }}</h2>
+<p>Credits: {{ user.credits }}</p>
+<p>Subscription Ends: {{ user.subscription_end }}</p>
+<h3>Purchase Plan</h3>
+<button onclick="purchasePlan('basic')">Basic: 50 credits for $6.99</button>
+<button onclick="purchasePlan('popular')">Popular: 100 credits for $9.99</button>
+<button onclick="purchasePlan('weekly')">Weekly: Unlimited credits for $14.99</button>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    function purchasePlan(plan) {
+        fetch('/purchase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ plan: plan }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const stripe = Stripe('pk_test_51PcdKRLjkkNKzIGfsPKSHxyy3sc8TbECNU2cr9tiVBNK1K3OBOT07l8dF3Tsqs8lMFFvgTzK2Q1EDsboTLKXTPP600nmxKJlKq');
+            stripe.redirectToCheckout({ sessionId: data.session_id });
+        });
+    }
+</script>
+{% endblock %}
