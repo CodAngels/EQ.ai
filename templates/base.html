@@ -2,16 +2,73 @@
 <html>
 <head>
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-top: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>EQ.Ai</h1>
+        <h1>EQ.ai</h1>
         <nav>
             <ul>
                 <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% if current_user.credits >= 2 or current_user.has_active_subscription() %}
+                        <li><a href="{{ url_for('text_exchange') }}">Text Exchange</a></li>
+                    {% endif %}
                 {% else %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                     <li><a href="{{ url_for('register') }}">Register</a></li>

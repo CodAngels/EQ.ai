@@ -3,9 +3,78 @@
 {% block title %}Text Exchange{% endblock %}
 
 {% block content %}
-<h2>Text Exchange</h2>
-<div id="text-exchange">
-    <h3>Empathetic Text Generation</h3>
+<style>
+    .conversation {
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 300px;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+    }
+
+    .user-message, .bot-message {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 5px 0;
+        width: 40%;
+        border-radius: 10px;
+    }
+
+    .user-message {
+        text-align: left;
+        margin-left: auto;
+        color: white;
+        background-color: green;
+    }
+
+    .bot-message {
+        text-align: left;
+        margin-right: auto;
+        color: white;
+        background-color: gray;
+    }
+
+    .tab-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-bottom: none;
+        margin-right: 5px;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+    .tab.active {
+        background-color: #e0e0e0;
+        border-top: 3px solid #007bff;
+    }
+
+    .tab-content {
+        display: none;
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+</style>
+
+<h2>Gen AI </h2>
+<div class="tab-container">
+    <div class="tab active" onclick="showTab('empath')">Empath</div>
+    <div class="tab" onclick="showTab('flirt')">Flirt</div>
+</div>
+
+<div id="empath" class="tab-content active">
+    <h3> Ai Empath </h3>
     <div id="empathetic-conversation" class="conversation"></div>
     <textarea id="context" placeholder="Enter context here..."></textarea>
     <textarea id="message" placeholder="Enter your message here..."></textarea>
@@ -16,8 +85,10 @@
     </div>
     <button onclick="generateEmpatheticText()">Generate Response</button>
     <button onclick="copyToClipboard('empathetic-conversation')">Copy to Clipboard</button>
+</div>
 
-    <h3>Flirty Text Generation</h3>
+<div id="flirt" class="tab-content">
+    <h3> Ai Flirt </h3>
     <div id="flirty-conversation" class="conversation"></div>
     <div class="persona">
         <button onclick="setPersona('Serious')">Serious</button>
@@ -33,6 +104,17 @@
     let tone = 'Casual';
     let persona = 'Serious';
 
+    function showTab(tabId) {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+    }
+
     function setTone(selectedTone) {
         tone = selectedTone;
     }
@@ -44,7 +126,7 @@
     function generateEmpatheticText() {
         const context = document.getElementById('context').value;
         const message = document.getElementById('message').value;
-        
+
         const userMessage = document.createElement('div');
         userMessage.classList.add('user-message');
         userMessage.innerText = `You: ${message}`;
@@ -74,7 +156,7 @@
 
     function generateFlirtyText() {
         const message = document.getElementById('flirty_message').value;
-        
+
         const userMessage = document.createElement('div');
         userMessage.classList.add('user-message');
         userMessage.innerText = `You: ${message}`;
@@ -108,35 +190,4 @@
     }
 </script>
 
-<style>
-    .conversation {
-        border: 1px solid #ccc;
-        padding: 10px;
-        height: 300px;
-        overflow-y: scroll;
-        margin-bottom: 10px;
-    }
-
-    .user-message, .bot-message {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 5px 0;
-        width: 40%;
-        border-radius: 10px;
-    }
-
-    .user-message {
-        text-align: left;
-        margin-left: auto;
-        color: blue;
-        background-color: #f0f8ff;
-    }
-
-    .bot-message {
-        text-align: left;
-        margin-right: auto;
-        color: green;
-        background-color: #e6ffe6;
-    }
-</style>
 {% endblock %}

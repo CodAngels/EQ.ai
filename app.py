@@ -24,6 +24,11 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 def load_user(user_id):
     return User.query.get(user_id)
 
+# Custom filter to format datetime
+@app.template_filter('datetime_format')
+def datetime_format(value):
+    return value.strftime('%Y-%m-%d %H:%Mhr')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -53,7 +58,9 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            if not current_user.has_active_subscription() and current_user.credits < 2:
+                return redirect(url_for('dashboard'))
+            return redirect(url_for('text_exchange'))
         
         return jsonify({'error': 'Invalid credentials'}), 400
     
@@ -85,13 +92,13 @@ def purchase():
         plan = data.get('plan')
         
         if plan == 'basic':
-            amount = 6.99
+            amount = 3.99
             credits = 50
         elif plan == 'popular':
-            amount = 9.99
+            amount = 5.99
             credits = 100
         elif plan == 'weekly':
-            amount = 14.99
+            amount = 9.99
             credits = None 
         
         # Create a Stripe payment session
@@ -206,7 +213,7 @@ def generate_flirty_text():
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a flirty assistant. Generate a response to the message given."},
+            {"role": "system", "content": "You are a love specialist and an expert in flirting. You have read a lot of charming love books and had a lot of love experiences. Given a text message, come up with the most charming and flirty response to it."},
             {"role": "user", "content": prompt}
         ],
         max_tokens=150
@@ -228,30 +235,3 @@ if __name__ == '__main__':
         db.create_all()
     app.run(debug=True)
 
-
-# def process_with_gpt(resume_text, job_description):
-#     openai.api_key = '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'
-
-#     response = openai.Completion.create(
-#         engine="gpt-3.5-turbo-instruct",
-#         prompt = f"""
-#         You are an experienced recruiting advisor and former hiring manager, now specializing in revising resumes to align perfectly with specific job descriptions. Your task is to modify the following resume to ensure it matches and emphasizes the skills, responsibilities, and qualifications listed in the target job description, particularly focusing on those aspects that are likely screened by automated systems.
-
-#         Job Applicant's Resume:
-#         {resume_text}
-
-#         Target Job Description:
-#         {job_description}
-
-#         Instructions:
-#         - Explicitly align the resume's content with the job description, ensuring each qualification and skill required by the job is addressed in the resume.
-#         - Important:Highlight critical keywords and phrases from the job description throughout the resume, using them to draw direct parallels between the applicant's experience and job requirements.
-#         - Important: Where possible, quantify achievements to demonstrate measurable outcomes.
-#         - Adjust the tone and wording of each point/achievement in the resume to reflect the language used in the job description, making the applicant appear as an ideal fit for the role.
-#         - Do not repeat the qualifications from the job description at the end of the resume.
-#         Please rewrite the resume with these directions in mind, ensuring it passes through automated screening with high chances of securing an interview for the applicant.
-#         """,
-#         max_tokens=1024
-#     )
-    
-#     return response.choices[0].text.strip()

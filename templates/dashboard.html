@@ -3,13 +3,143 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2>Welcome, {{ user.username }}</h2>
-<p>Credits: {{ user.credits }}</p>
-<p>Subscription Ends: {{ user.subscription_end }}</p>
-<h3>Purchase Plan</h3>
-<button onclick="purchasePlan('basic')">Basic: 50 credits for $6.99</button>
-<button onclick="purchasePlan('popular')">Popular: 100 credits for $9.99</button>
-<button onclick="purchasePlan('weekly')">Weekly: Unlimited credits for $14.99</button>
+<style>
+    .user-details {
+        border: 1px solid #ddd;
+        padding: 5px;
+        margin: 5px auto;
+        width: 25%;
+        text-align: center;
+        border-radius: 8px;
+    }
+
+    .user-info {
+        margin-top: 10px;
+    }
+
+    h4 {
+        text-align: center;
+    }
+
+    .pricing-table {
+        display: flex; /* Arrange plans side by side */
+        justify-content: center; /* Center the table */
+        flex-wrap: wrap; /* Wrap to next line on smaller screens */
+    }
+
+    .plan {
+        width: 300px; /* Adjust width as needed */
+        margin: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s; /* Smooth hover effect */
+    }
+
+    /* Highlight the Pro plan */
+    .pro {
+        border: 2px solid #007bff; /* Blue border for emphasis */
+        transform: scale(1.05); /* Slightly larger */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow */
+    }
+
+    .plan:hover {
+        transform: scale(1.1); /* Enlarge on hover */
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* More prominent shadow */
+    }
+
+    .price {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .features li {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .signup {
+        background-color: #007bff; /* Blue button */
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .signup:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) { 
+        .pricing-table {
+            flex-direction: column; /* Stack plans vertically on small screens */
+        }
+    }
+    
+    /* Ensure the footer is always at the bottom */
+    body, html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1;
+    }
+
+    footer {
+        text-align: center;
+        padding: 10px;
+        background-color: #f1f1f1;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+
+<div class="user-details">
+    <h3>Welcome, {{ user.username }}</h3>
+    <div class="user-info">
+        <p><strong>Credits: {{ user.credits }}</strong></p>
+        <p><strong>Subscription Ends: {{ user.subscription_end|datetime_format }}</strong></p>
+    </div>
+</div>
+<h4>Purchase Plan</h4>
+
+<div class="pricing-table">
+    <div class="plan basic">
+      <h3>Basic</h3>
+      <p class="price">$3.99</p>
+      <ul class="features">
+        <li>&#10003; 50 Credits</li>
+      </ul>
+      <button class="signup" onclick="purchasePlan('basic')">Get Now</button>
+    </div>
+
+    <div class="plan pro">
+      <h3>Popular</h3>
+      <p class="price">$5.99</p>
+      <ul class="features">
+        <li>&#10003; 100 Credits</li>
+      </ul>
+      <button class="signup" onclick="purchasePlan('popular')">Get Now</button>
+    </div>
+
+    <div class="plan enterprise">
+      <h3>Weekly Unlimited</h3>
+      <p class="price">$9.99</p>
+      <ul class="features">
+        <li>&#10003; Unlimited Credits</li>
+        <li>&#10003; Valid for 7 Days</li>
+      </ul>
+      <button class="signup" onclick="purchasePlan('weekly')">Get Now</button>
+    </div>
+</div>
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
