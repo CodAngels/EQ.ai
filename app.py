@@ -18,7 +18,7 @@ db.init_app(app)
 login_manager = LoginManager(app)
 
 stripe.api_key = app.config['STRIPE_SECRET_KEY']
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -27,7 +27,10 @@ def load_user(user_id):
 # Custom filter to format datetime
 @app.template_filter('datetime_format')
 def datetime_format(value):
+    if value is None:
+        return 'N/A'
     return value.strftime('%Y-%m-%d %H:%Mhr')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -165,6 +168,37 @@ Main features which are the text generation components
 @login_required
 def text_exchange():
     return render_template('text_exchange.html', user=current_user)
+
+@app.route('/rephrase_text_with_intent', methods=['POST'])
+@login_required
+def rephrase_text_with_intent():
+    if not current_user.has_active_subscription() and current_user.credits < 2:
+        return jsonify({'error': 'Not enough credits'}), 402
+    
+    data = request.json
+    intent = data.get('intent')
+    message = data.get('message')
+
+    prompt = f"Context: {intent}\nMessage: {message}"
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a linguist expert and an emotionally intelligent assistant. Given what a user's intent, rephrase the message to align with it"},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=150
+    )
+
+    # Debugging: Print the response structure
+    current_app.logger.info(f"OpenAI Response: {response}")
+
+    if not current_user.has_active_subscription():
+        current_user.credits -= 2
+        db.session.commit()
+
+    return jsonify(response.choices[0].message.content)
+
 
 @app.route('/generate_empathetic_text', methods=['POST'])
 @login_required

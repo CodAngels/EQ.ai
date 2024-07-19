@@ -18,6 +18,7 @@
         margin: 5px 0;
         width: 40%;
         border-radius: 10px;
+        position: relative; /* For positioning the copy button */
     }
 
     .user-message {
@@ -32,6 +33,20 @@
         margin-right: auto;
         color: white;
         background-color: gray;
+    }
+
+    .copy-button {
+        position: absolute;
+        top: 50%;
+        right: -40px; /* Adjust as needed */
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .copy-button img {
+        width: 24px; /* Adjust size as needed */
     }
 
     .tab-container {
@@ -67,43 +82,21 @@
     }
 </style>
 
-<h2>Gen AI </h2>
 <div class="tab-container">
-    <div class="tab active" onclick="showTab('empath')">Empath</div>
-    <div class="tab" onclick="showTab('flirt')">Flirt</div>
+    <div class="tab active" onclick="showTab('rephrase')">Rephrase</div>
+    <!-- Other tabs can be added here if needed -->
 </div>
 
-<div id="empath" class="tab-content active">
-    <h3> Ai Empath </h3>
-    <div id="empathetic-conversation" class="conversation"></div>
-    <textarea id="context" placeholder="Enter context here..."></textarea>
-    <textarea id="message" placeholder="Enter your message here..."></textarea>
-    <div class="tone">
-        <button onclick="setTone('Formal')">Formal</button>
-        <button onclick="setTone('Casual')">Casual</button>
-        <button onclick="setTone('Super Casual')">Super Casual</button>
-    </div>
-    <button onclick="generateEmpatheticText()">Generate Response</button>
-    <button onclick="copyToClipboard('empathetic-conversation')">Copy to Clipboard</button>
-</div>
-
-<div id="flirt" class="tab-content">
-    <h3> Ai Flirt </h3>
-    <div id="flirty-conversation" class="conversation"></div>
-    <div class="persona">
-        <button onclick="setPersona('Serious')">Serious</button>
-        <button onclick="setPersona('Nerd')">Nerd</button>
-        <button onclick="setPersona('Player')">Player</button>
-    </div>
-    <textarea id="flirty_message" placeholder="Enter your message here..."></textarea>
-    <button onclick="generateFlirtyText()">Generate Response</button>
-    <button onclick="copyToClipboard('flirty-conversation')">Copy to Clipboard</button>
+<div id="rephrase" class="tab-content active">
+    <h3>Rephrase with Intent</h3>
+    <div id="rephrase-conversation" class="conversation"></div>
+    <textarea id="intent" placeholder="Input the text with your intent..."></textarea>
+    <textarea id="rephrase_message" placeholder="Input the initial message you have..."></textarea>
+    <button onclick="rephraseText()">Rephrase</button>
+    <button onclick="copyToClipboard('rephrase-conversation')">Copy to Clipboard</button>
 </div>
 
 <script>
-    let tone = 'Casual';
-    let persona = 'Serious';
-
     function showTab(tabId) {
         document.querySelectorAll('.tab').forEach(tab => {
             tab.classList.remove('active');
@@ -115,36 +108,36 @@
         document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
     }
 
-    function setTone(selectedTone) {
-        tone = selectedTone;
-    }
-
-    function setPersona(selectedPersona) {
-        persona = selectedPersona;
-    }
-
-    function generateEmpatheticText() {
-        const context = document.getElementById('context').value;
-        const message = document.getElementById('message').value;
+    function rephraseText() {
+        const intent = document.getElementById('intent').value;
+        const message = document.getElementById('rephrase_message').value;
 
         const userMessage = document.createElement('div');
         userMessage.classList.add('user-message');
         userMessage.innerText = `You: ${message}`;
-        document.getElementById('empathetic-conversation').appendChild(userMessage);
+        document.getElementById('rephrase-conversation').appendChild(userMessage);
 
-        fetch('/generate_empathetic_text', {
+        fetch('/rephrase_text_with_intent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ context, message, tone }),
+            body: JSON.stringify({ intent, message }),
         })
         .then(response => response.json())
         .then(data => {
             const botMessage = document.createElement('div');
             botMessage.classList.add('bot-message');
             botMessage.innerText = `EQ.ai: ${data}`;
-            document.getElementById('empathetic-conversation').appendChild(botMessage);
+
+            const copyButton = document.createElement('button');
+            copyButton.classList.add('copy-button');
+            copyButton.innerHTML = `<img src="{{ url_for('static', filename='copy.png') }}" alt="Copy">`;
+            copyButton.onclick = () => copyToClipboard(data);
+
+            botMessage.appendChild(copyButton);
+            document.getElementById('rephrase-conversation').appendChild(botMessage);
+
             if (data.error) {
                 alert(data.error);
             }
@@ -154,39 +147,12 @@
         });
     }
 
-    function generateFlirtyText() {
-        const message = document.getElementById('flirty_message').value;
-
-        const userMessage = document.createElement('div');
-        userMessage.classList.add('user-message');
-        userMessage.innerText = `You: ${message}`;
-        document.getElementById('flirty-conversation').appendChild(userMessage);
-
-        fetch('/generate_flirty_text', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ persona, message }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            const botMessage = document.createElement('div');
-            botMessage.classList.add('bot-message');
-            botMessage.innerText = `EQ.ai: ${data}`;
-            document.getElementById('flirty-conversation').appendChild(botMessage);
-            if (data.error) {
-                alert(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard');
+        }).catch(err => {
+            console.error('Error copying to clipboard', err);
         });
-    }
-
-    function copyToClipboard(elementId) {
-        const text = document.getElementById(elementId).innerText;
-        navigator.clipboard.writeText(text);
     }
 </script>
 
