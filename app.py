@@ -6,14 +6,23 @@ from datetime import datetime, timedelta
 from flask_migrate import Migrate
 import stripe
 import os
+from dotenv import load_dotenv
 from openai import OpenAI 
 
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'youpieceofshit'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///eqai.db'
-app.config['STRIPE_SECRET_KEY'] = 'sk_test_51PcdKRLjkkNKzIGfSXuiOqFYeOlUro8MdIKsA0GUw7zFlt2EC7PMbKA8r1PUwLpMgiENGDfRkEPwvb6G1fNW92hk00WX8LoPn3'
-app.config['OPENAI_API_KEY'] = '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'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config['STRIPE_SECRET_KEY'] = os.getenv('STRIPE_SECRET_KEY')
+app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+# app = Flask(__name__)
+# app.config['SECRET_KEY'] = 'youpieceofshit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///eqai.db'
+# app.config['STRIPE_SECRET_KEY'] = 'sk_test_51PcdKRLjkkNKzIGfSXuiOqFYeOlUro8MdIKsA0GUw7zFlt2EC7PMbKA8r1PUwLpMgiENGDfRkEPwvb6G1fNW92hk00WX8LoPn3'
+# app.config['OPENAI_API_KEY'] = 'sk-None-0jL7gVfdh2tk5m8FSD2fT3BlbkFJnf4Q5B4V2ZLEgtLWzhyP'
+
 db.init_app(app)
 login_manager = LoginManager(app)
 
