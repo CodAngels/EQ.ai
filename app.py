@@ -179,12 +179,13 @@ def rephrase_text_with_intent():
     intent = data.get('intent')
     message = data.get('message')
 
-    prompt = f"Context: {intent}\nMessage: {message}"
+    # Improved prompt
+    prompt = f"User's Intent: {intent}\nUser's Draft Message: {message}\n\nRephrase the draft message to align with the user's intent, ensuring the rephrased message is clear, empathetic, and maintains the intended tone. Do not include any prefatory text."
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a linguist expert and an emotionally intelligent assistant. Given what a user's intent, rephrase the message to align with it"},
+            {"role": "system", "content": "You are a linguistics expert and an emotionally intelligent assistant. Your task is to help users express their intended messages clearly and empathetically. Given the user's intent and draft message, rephrase the message to align with their intent. Ensure the rephrased message is clear, empathetic, and maintains the intended tone."},
             {"role": "user", "content": prompt}
         ],
         max_tokens=150
